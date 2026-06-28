@@ -37,3 +37,17 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Oracle Wallet y credenciales — no subir a git ###
+wallet/
+!wallet/.gitkeep
+**/WEB-INF/wallet/*.sso
+**/WEB-INF/wallet/*.p12
+**/WEB-INF/wallet/*.jks
+**/WEB-INF/wallet/*.ora
+**/WEB-INF/wallet/cwallet*
+**/WEB-INF/wallet/ewallet*
+**/WEB-INF/wallet/keystore*
+**/WEB-INF/wallet/truststore*
+**/WEB-INF/wallet/ojdbc*
+src/main/resources/db.properties
