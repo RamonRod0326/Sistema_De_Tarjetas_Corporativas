@@ -69,7 +69,7 @@
 
         <form method="post" action="${pageContext.request.contextPath}/login">
             <div class="form-group">
-                <label class="form-label">Correo Electrónico</label>
+                <label class="form-label" style="text-transform:uppercase;letter-spacing:1px;font-size:0.72rem;">Correo Electrónico</label>
                 <div class="input-wrapper">
                     <span class="input-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -81,9 +81,8 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="form-label">
+                <label class="form-label" style="text-transform:uppercase;letter-spacing:1px;font-size:0.72rem;">
                     Contraseña
-                    <a href="${pageContext.request.contextPath}/recuperar-password">Olvidé mi contraseña</a>
                 </label>
                 <div class="input-wrapper">
                     <span class="input-icon">
@@ -100,6 +99,7 @@
                         </svg>
                     </button>
                 </div>
+                <a href="${pageContext.request.contextPath}/recuperar-password" style="display:block;margin-top:0.5rem;font-size:0.75rem;color:#0ff;text-decoration:none;">Olvidé mi contraseña</a>
             </div>
             <button type="submit" class="btn btn-primary btn-block btn-lg">
                 Iniciar Sesión &rarr;
