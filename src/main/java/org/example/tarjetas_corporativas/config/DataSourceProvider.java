@@ -75,7 +75,7 @@ public class DataSourceProvider {
         throw new ExceptionInInitializerError(
             "No se encontró el wallet de Oracle. " +
             "Define la variable de entorno DB_WALLET_PATH " +
-            "o coloca los archivos del wallet en src/main/webapp/WEB-INF/wallet/");
+            "o coloca los archivos del wallet en src/main/resources/wallet/");
     }
 
     private static String requireEnv(String name) {

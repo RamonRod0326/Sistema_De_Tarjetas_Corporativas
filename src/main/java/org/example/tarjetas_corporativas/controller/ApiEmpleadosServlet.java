@@ -11,6 +11,7 @@ import org.example.tarjetas_corporativas.dto.EmpleadoRowDTO;
 import org.example.tarjetas_corporativas.exception.ServiceException;
 import org.example.tarjetas_corporativas.service.EmpleadoService;
 import org.example.tarjetas_corporativas.util.JsonUtil;
+import org.example.tarjetas_corporativas.util.PasswordUtil;
 import java.io.IOException;
 import java.util.List;
 
@@ -122,6 +123,28 @@ public class ApiEmpleadosServlet extends HttpServlet {
                 JsonUtil.writeError(res, 400, "Nombre, email y contraseña son requeridos");
                 return;
             }
+            if (!nombre.trim().matches("[A-Za-záéíóúÁÉÍÓÚüÜñÑ\\s'\\-]+")) {
+                JsonUtil.writeError(res, 400, "El nombre solo puede contener letras");
+                return;
+            }
+            if (apellidoPat != null && !apellidoPat.isBlank()
+                    && !apellidoPat.trim().matches("[A-Za-záéíóúÁÉÍÓÚüÜñÑ\\s'\\-]+")) {
+                JsonUtil.writeError(res, 400, "El apellido paterno solo puede contener letras");
+                return;
+            }
+            if (apellidoMat != null && !apellidoMat.isBlank()
+                    && !apellidoMat.trim().matches("[A-Za-záéíóúÁÉÍÓÚüÜñÑ\\s'\\-]+")) {
+                JsonUtil.writeError(res, 400, "El apellido materno solo puede contener letras");
+                return;
+            }
+            if (!email.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+                JsonUtil.writeError(res, 400, "El correo electrónico no tiene un formato válido");
+                return;
+            }
+            if (!PasswordUtil.isValid(password)) {
+                JsonUtil.writeError(res, 400, PasswordUtil.POLICY_MSG);
+                return;
+            }
 
             empleadoService.crear(nombre.trim(), apellidoPat, apellidoMat, email.trim(),
                                   password, rol != null ? rol : "empleado",
@@ -155,6 +178,28 @@ public class ApiEmpleadosServlet extends HttpServlet {
 
             if (id <= 0 || nombre == null || nombre.isBlank() || email == null || email.isBlank()) {
                 JsonUtil.writeError(res, 400, "ID, nombre y email son requeridos");
+                return;
+            }
+            if (!nombre.trim().matches("[A-Za-záéíóúÁÉÍÓÚüÜñÑ\\s'\\-]+")) {
+                JsonUtil.writeError(res, 400, "El nombre solo puede contener letras");
+                return;
+            }
+            if (apellidoPat != null && !apellidoPat.isBlank()
+                    && !apellidoPat.trim().matches("[A-Za-záéíóúÁÉÍÓÚüÜñÑ\\s'\\-]+")) {
+                JsonUtil.writeError(res, 400, "El apellido paterno solo puede contener letras");
+                return;
+            }
+            if (apellidoMat != null && !apellidoMat.isBlank()
+                    && !apellidoMat.trim().matches("[A-Za-záéíóúÁÉÍÓÚüÜñÑ\\s'\\-]+")) {
+                JsonUtil.writeError(res, 400, "El apellido materno solo puede contener letras");
+                return;
+            }
+            if (!email.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+                JsonUtil.writeError(res, 400, "El correo electrónico no tiene un formato válido");
+                return;
+            }
+            if (password != null && !password.isBlank() && !PasswordUtil.isValid(password)) {
+                JsonUtil.writeError(res, 400, PasswordUtil.POLICY_MSG);
                 return;
             }
 

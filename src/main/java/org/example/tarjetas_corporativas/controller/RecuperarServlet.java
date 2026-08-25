@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.example.tarjetas_corporativas.exception.ServiceException;
 import org.example.tarjetas_corporativas.service.AuthService;
+import org.example.tarjetas_corporativas.util.PasswordUtil;
 import java.io.IOException;
 
 /**
@@ -146,8 +147,8 @@ public class RecuperarServlet extends HttpServlet {
         String nueva    = req.getParameter("passwordNueva");
         String confirma = req.getParameter("passwordConfirma");
 
-        if (nueva == null || nueva.length() < 8) {
-            req.setAttribute("error", "La contraseña debe tener al menos 8 caracteres.");
+        if (!PasswordUtil.isValid(nueva)) {
+            req.setAttribute("error", PasswordUtil.POLICY_MSG);
             req.setAttribute("paso", "3");
             req.getRequestDispatcher("/WEB-INF/jsp/recuperar-password.jsp").forward(req, res);
             return;

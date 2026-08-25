@@ -10,6 +10,7 @@ import org.example.tarjetas_corporativas.dto.PerfilDTO;
 import org.example.tarjetas_corporativas.exception.ServiceException;
 import org.example.tarjetas_corporativas.service.CatalogoService;
 import org.example.tarjetas_corporativas.service.ConfigService;
+import org.example.tarjetas_corporativas.util.PasswordUtil;
 import java.io.IOException;
 
 @WebServlet(name = "adminConfigServlet", urlPatterns = {
@@ -155,8 +156,8 @@ public class AdminConfigServlet extends HttpServlet {
         String confirma = req.getParameter("passwordConfirma");
 
         if (actual == null || nueva == null || confirma == null
-                || nueva.isBlank() || !nueva.equals(confirma) || nueva.length() < 8) {
-            res.sendRedirect(req.getContextPath() + "/admin/configuracion?toast=pass_err"); return;
+                || !nueva.equals(confirma) || !PasswordUtil.isValid(nueva)) {
+            res.sendRedirect(req.getContextPath() + "/admin/configuracion?toast=pass_policy"); return;
         }
 
         try {

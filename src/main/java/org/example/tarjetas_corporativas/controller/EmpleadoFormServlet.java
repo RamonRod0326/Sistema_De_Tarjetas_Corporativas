@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.tarjetas_corporativas.exception.ServiceException;
 import org.example.tarjetas_corporativas.service.EmpleadoService;
+import org.example.tarjetas_corporativas.util.PasswordUtil;
 import java.io.IOException;
 
 @WebServlet(name = "empleadoFormServlet", urlPatterns = {"/admin/empleados/form"})
@@ -58,8 +59,8 @@ public class EmpleadoFormServlet extends HttpServlet {
                         email.trim().toLowerCase(), password, rolFinal, depId, cargoId);
                 response.sendRedirect(request.getContextPath() + "/admin/empleados?toast=empleado_editado");
             } else {
-                if (password == null || password.isBlank()) {
-                    response.sendRedirect(request.getContextPath() + "/admin/empleados?toast=empleado_error"); return;
+                if (!PasswordUtil.isValid(password)) {
+                    response.sendRedirect(request.getContextPath() + "/admin/empleados?toast=pass_policy"); return;
                 }
                 empleadoService.crear(nombre.trim(), apellidoPat, apellidoMat,
                         email.trim().toLowerCase(), password, rolFinal, depId, cargoId);

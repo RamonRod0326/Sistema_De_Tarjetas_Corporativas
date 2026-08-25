@@ -164,10 +164,9 @@
                     style="width:100%;padding:0.65rem;border-radius:8px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;">
                 </button>
             </form>
-            <form id="formCancelar" action="${pageContext.request.contextPath}/admin/tarjetas/cancelar" method="POST"
-                  onsubmit="return confirm('¿Cancelar esta tarjeta definitivamente? Esta acción no se puede deshacer.')">
+            <form id="formCancelar" action="${pageContext.request.contextPath}/admin/tarjetas/cancelar" method="POST">
                 <input type="hidden" name="id" id="fCancelarId">
-                <button type="submit"
+                <button type="button" onclick="confirmarCancelar()"
                     style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid rgba(255,77,106,0.4);background:rgba(255,77,106,0.08);color:#FF4D6A;font-size:0.82rem;font-weight:600;cursor:pointer;">
                     ✕ Cancelar tarjeta
                 </button>
@@ -227,10 +226,20 @@ function verDetalle(idx) {
 
 function confirmarEstado() {
     var est = document.getElementById('fEstadoVal').value;
-    var msg = est === 'BLOQUEADA'
-        ? '¿Bloquear esta tarjeta? El titular no podrá utilizarla.'
-        : '¿Desbloquear esta tarjeta? El titular podrá volver a utilizarla.';
-    if (confirm(msg)) document.getElementById('formEstado').submit();
+    var esBloqueada = est === 'BLOQUEADA';
+    showConfirm(
+        esBloqueada ? 'El titular no podrá utilizar la tarjeta hasta que sea desbloqueada.'
+                    : 'El titular podrá volver a utilizar su tarjeta.',
+        function() { document.getElementById('formEstado').submit(); },
+        { title: esBloqueada ? '¿Bloquear tarjeta?' : '¿Desbloquear tarjeta?',
+          confirmText: esBloqueada ? 'Sí, bloquear' : 'Sí, desbloquear',
+          danger: esBloqueada }
+    );
+}
+function confirmarCancelar() {
+    showConfirm('Esta acción es irreversible. La tarjeta quedará cancelada definitivamente.', function() {
+        document.getElementById('formCancelar').submit();
+    }, { title: '¿Cancelar tarjeta?', confirmText: 'Sí, cancelar', danger: true });
 }
 
 function cerrarDetalle() {

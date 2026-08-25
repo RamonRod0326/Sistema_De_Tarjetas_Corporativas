@@ -27,7 +27,7 @@
             <p style="color:#8892a4;font-size:0.85rem;margin-bottom:1.5rem;">Para realizar una transferencia, selecciona una cuenta desde <a href="${pageContext.request.contextPath}/user/cuentas" style="color:#0ff;text-decoration:none;">Mis Cuentas</a>.</p>
 
             <!-- Stats del mes desde DB -->
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;">
+            <div class="stat-row-4">
                 <div style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.1rem;">
                     <p style="color:#8892a4;font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;margin:0 0 0.3rem;">Este mes</p>
                     <p style="color:#fff;font-size:1.3rem;font-weight:700;margin:0;">${totalMes}</p>
@@ -45,10 +45,10 @@
                 </div>
                 <div style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.1rem;">
                     <p style="color:#8892a4;font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;margin:0 0 0.3rem;">Neto</p>
-                    <p style="color:#0ff;font-size:1.3rem;font-weight:700;margin:0;">
+                    <p style="color:${neto >= 0 ? '#00e676' : '#ff5252'};font-size:1.3rem;font-weight:700;margin:0;">
                         <c:choose>
                             <c:when test="${neto >= 0}">+</c:when>
-                            <c:otherwise></c:otherwise>
+                            <c:otherwise>-</c:otherwise>
                         </c:choose>$<fmt:formatNumber value="${neto < 0 ? -neto : neto}" pattern="#,##0.00"/>
                     </p>
                     <p style="color:#8892a4;font-size:0.72rem;margin:0.15rem 0 0;">MXN</p>

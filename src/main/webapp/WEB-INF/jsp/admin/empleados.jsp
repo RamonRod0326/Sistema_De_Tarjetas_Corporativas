@@ -25,6 +25,18 @@
         .cat-dd-opt.selected::before { content:'✓';font-size:0.75rem;color:#0ff; }
         .cat-dd-opt:not(.selected)::before { content:'';display:inline-block;width:0.75rem; }
         .cat-dd-none { padding:0.75rem 1rem;color:#6B7084;font-size:0.82rem; }
+        .page-header-row { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;gap:1rem; }
+        .search-form { display:flex;align-items:center;gap:1rem;margin-bottom:1rem; }
+        .table-scroll { overflow-x:auto; }
+        .table-scroll .data-table { min-width:560px; }
+        @media(max-width:600px){
+            .page-header-row { flex-direction:column; }
+            .page-header-row .btn { width:100%;justify-content:center; }
+            .search-form { flex-wrap:wrap; }
+            .search-form .input-wrapper { flex:1 1 100% !important; }
+            .search-form select { flex:1 1 calc(50% - 0.5rem) !important; }
+            .search-form button[type=submit] { flex:1 1 calc(50% - 0.5rem) !important; }
+        }
     </style>
 </head>
 <body>
@@ -34,19 +46,19 @@
     <div class="main-content">
         <jsp:include page="../components/header.jsp"/>
         <div class="content-area">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;">
+            <div class="page-header-row">
                 <div>
                     <h1 class="page-title" style="margin:0;">Gestión de Empleados</h1>
                     <p style="color:#8892a4;font-size:0.85rem;margin-top:0.25rem;">Administra y monitorea el acceso institucional de tu equipo.</p>
                 </div>
-                <button class="btn btn-primary" onclick="abrirModalNuevo()" style="display:inline-flex;align-items:center;gap:0.5rem;">
+                <button class="btn btn-primary" onclick="abrirModalNuevo()" style="display:inline-flex;align-items:center;gap:0.5rem;flex-shrink:0;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     Registrar Empleado
                 </button>
             </div>
 
             <!-- Stats -->
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;">
+            <div class="stat-row-4" style="margin-bottom:1.5rem;">
                 <div class="card" style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.25rem;">
                     <p style="color:#8892a4;font-size:0.75rem;margin:0;">Total Empleados</p>
                     <p style="color:#fff;font-size:1.5rem;font-weight:700;margin:0.25rem 0 0;">${stats.totalEmpleados}</p>
@@ -66,7 +78,7 @@
             </div>
 
             <!-- Search & Filter (server-side) -->
-            <form method="GET" action="${pageContext.request.contextPath}/admin/empleados" style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
+            <form method="GET" action="${pageContext.request.contextPath}/admin/empleados" class="search-form">
                 <div class="input-wrapper" style="flex:3;position:relative;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8892a4" stroke-width="2" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     <input type="text" name="q" value="${q}" placeholder="Buscar empleados por nombre, correo o departamento..."
@@ -81,7 +93,7 @@
             </form>
 
             <!-- Table -->
-            <div class="table-container" style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
+            <div class="table-container table-scroll" style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
                 <table class="data-table" style="width:100%;border-collapse:collapse;">
                     <thead>
                         <tr style="border-bottom:1px solid rgba(255,255,255,0.08);">
@@ -183,7 +195,7 @@
         <h2 id="modalTitle" style="color:#fff;margin:0 0 1.5rem;font-size:1.1rem;">Registrar Empleado</h2>
         <input type="hidden" id="empId">
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div class="two-col-equal" style="gap:1rem;margin-bottom:1rem;">
             <div>
                 <label style="display:block;color:#8892a4;font-size:0.78rem;margin-bottom:0.4rem;">Nombre *</label>
                 <input type="text" id="empNombre" placeholder="Nombre"
@@ -380,18 +392,31 @@ function cargarCatalogos(depId, cargoId, deps, cargos) {
 }
 
 async function guardarEmpleado() {
-    const id       = document.getElementById('empId').value;
-    const nombre   = document.getElementById('empNombre').value.trim();
-    const email    = document.getElementById('empEmail').value.trim();
-    const password = document.getElementById('empPassword').value;
+    const id        = document.getElementById('empId').value;
+    const nombre    = document.getElementById('empNombre').value.trim();
+    const apPat     = document.getElementById('empApPat').value.trim();
+    const apMat     = document.getElementById('empApMat').value.trim();
+    const email     = document.getElementById('empEmail').value.trim();
+    const password  = document.getElementById('empPassword').value;
 
-    if (!nombre || !email) { toast('Nombre y email son requeridos', false); return; }
-    if (!id && !password)  { toast('La contraseña es requerida para nuevos empleados', false); return; }
+    const soloLetras = /^[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s'-]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!nombre)                         { toast('El nombre es requerido', false); return; }
+    if (!soloLetras.test(nombre))        { toast('El nombre solo puede contener letras', false); return; }
+    if (apPat && !soloLetras.test(apPat)){ toast('El apellido paterno solo puede contener letras', false); return; }
+    if (apMat && !soloLetras.test(apMat)){ toast('El apellido materno solo puede contener letras', false); return; }
+    if (!email)                          { toast('El correo electrónico es requerido', false); return; }
+    if (!emailRegex.test(email))         { toast('El correo electrónico no tiene un formato válido', false); return; }
+    if (!id && !password)                { toast('La contraseña es requerida para nuevos empleados', false); return; }
+    if (!id && (password.length < 8 || !/\d/.test(password))) {
+        toast('La contraseña debe tener al menos 8 caracteres y contener al menos un número', false); return;
+    }
 
     const payload = {
         nombre,
-        apellidoPaterno: document.getElementById('empApPat').value.trim(),
-        apellidoMaterno: document.getElementById('empApMat').value.trim(),
+        apellidoPaterno: apPat,
+        apellidoMaterno: apMat,
         email,
         password,
         rol:            document.getElementById('empRol').value,
@@ -413,26 +438,24 @@ async function guardarEmpleado() {
     }
 }
 
-async function reactivarEmpleado(id) {
-    if (!confirm('¿Reactivar a este empleado? Volverá a tener acceso al sistema.')) return;
-    try {
-        const res = await api('PATCH', '/api/empleados?id=' + id);
-        toast(res.msg || 'Empleado reactivado', res.ok);
-        if (res.ok) location.reload();
-    } catch(e) {
-        toast('Error de conexión', false);
-    }
+function reactivarEmpleado(id) {
+    showConfirm('¿Reactivar a este empleado? Volverá a tener acceso al sistema.', async function() {
+        try {
+            const res = await api('PATCH', '/api/empleados?id=' + id);
+            toast(res.msg || 'Empleado reactivado', res.ok);
+            if (res.ok) location.reload();
+        } catch(e) { toast('Error de conexión', false); }
+    }, { title: '¿Reactivar empleado?', confirmText: 'Sí, reactivar', danger: false });
 }
 
-async function eliminarEmpleado(id) {
-    if (!confirm('¿Dar de baja a este empleado? Se devolverán los fondos de sus cuentas.')) return;
-    try {
-        const res = await api('DELETE', '/api/empleados?id=' + id);
-        toast(res.msg || 'Operación completada', res.ok);
-        if (res.ok) location.reload();
-    } catch(e) {
-        toast('Error de conexión', false);
-    }
+function eliminarEmpleado(id) {
+    showConfirm('¿Dar de baja a este empleado? Se devolverán los fondos de sus cuentas.', async function() {
+        try {
+            const res = await api('DELETE', '/api/empleados?id=' + id);
+            toast(res.msg || 'Operación completada', res.ok);
+            if (res.ok) location.reload();
+        } catch(e) { toast('Error de conexión', false); }
+    }, { title: '¿Dar de baja?', confirmText: 'Sí, dar de baja', danger: true });
 }
 
 document.getElementById('modalOverlay').addEventListener('click', function(e) {

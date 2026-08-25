@@ -1,3 +1,61 @@
+// ===== CONFIRM DIALOG =====
+function showConfirm(message, onConfirm, opts) {
+    opts = opts || {};
+    var title       = opts.title       || '¿Confirmar acción?';
+    var confirmText = opts.confirmText || 'Confirmar';
+    var danger      = opts.danger !== false; // default true
+
+    var existing = document.getElementById('_confirmOverlay');
+    if (existing) existing.remove();
+
+    var overlay = document.createElement('div');
+    overlay.id = '_confirmOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+
+    var iconColor = danger ? '#FF4D6A' : '#0ff';
+    var btnBg     = danger ? 'background:#FF4D6A;color:#fff;' : 'background:#0ff;color:#080A12;';
+    var iconSvg   = danger
+        ? '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="'+iconColor+'" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+        : '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="'+iconColor+'" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+
+    overlay.innerHTML =
+        '<div style="background:#0d1520;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:2rem;width:90%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,0.6);text-align:center;">' +
+            '<div style="width:56px;height:56px;border-radius:50%;background:rgba('+( danger?'255,77,106':'0,255,255')+',0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">' + iconSvg + '</div>' +
+            '<h3 style="color:#fff;font-size:1rem;font-weight:700;margin:0 0 0.6rem;">' + title + '</h3>' +
+            '<p style="color:#8892a4;font-size:0.875rem;line-height:1.6;margin:0 0 1.75rem;">' + message + '</p>' +
+            '<div style="display:flex;gap:0.75rem;justify-content:center;">' +
+                '<button id="_confirmCancel" style="flex:1;padding:0.75rem;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:#8892a4;font-size:0.875rem;font-weight:600;cursor:pointer;">Cancelar</button>' +
+                '<button id="_confirmOk"     style="flex:1;padding:0.75rem;border-radius:8px;border:none;'+btnBg+'font-size:0.875rem;font-weight:700;cursor:pointer;">' + confirmText + '</button>' +
+            '</div>' +
+        '</div>';
+
+    document.body.appendChild(overlay);
+
+    function close() { overlay.remove(); }
+    document.getElementById('_confirmCancel').addEventListener('click', close);
+    document.getElementById('_confirmOk').addEventListener('click', function() { close(); onConfirm(); });
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+}
+
+// ===== SIDEBAR MOBILE =====
+function toggleSidebar() {
+    var sidebar = document.querySelector('.sidebar');
+    var overlay = document.querySelector('.sidebar-overlay');
+    if (!sidebar) return;
+    var isOpen = sidebar.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('visible', isOpen);
+}
+function closeSidebar() {
+    var sidebar = document.querySelector('.sidebar');
+    var overlay = document.querySelector('.sidebar-overlay');
+    if (sidebar) sidebar.classList.remove('open');
+    if (overlay) overlay.classList.remove('visible');
+}
+// Close sidebar with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeSidebar(); }
+});
+
 // ===== TOAST SYSTEM =====
 function showToast(type, title, msg, duration) {
     duration = duration || 4000;
@@ -62,7 +120,9 @@ var TOAST_MAP = {
     'tarjeta_estado_error':['error',   'Error en tarjeta',         'No se pudo actualizar el estado de la tarjeta.'],
     'recuperar_ok':        ['success', 'Contraseña actualizada',   'Tu contraseña fue cambiada exitosamente. Inicia sesión con tus nuevas credenciales.'],
     'empleado_desactivado':['success', 'Empleado desactivado',     'El empleado y sus recursos han sido dados de baja.'],
-    'empleado_dup':        ['error',   'Correo duplicado',         'Ya existe un empleado registrado con ese correo electrónico.']
+    'empleado_dup':        ['error',   'Correo duplicado',         'Ya existe un empleado registrado con ese correo electrónico.'],
+    'pass_policy':         ['error',   'Contraseña inválida',      'Debe tener al menos 8 caracteres y contener al menos un número.'],
+    'pass_err':            ['error',   'Error al cambiar contraseña', 'Verifica que la contraseña actual sea correcta e intenta de nuevo.']
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -81,14 +141,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Mobile sidebar toggle
-    var menuToggle = document.getElementById('menuToggle');
-    var sidebar = document.querySelector('.sidebar');
-    if (menuToggle && sidebar) {
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('open');
-        });
-    }
+    // Mobile sidebar overlay
+    var overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    overlay.addEventListener('click', function() { closeSidebar(); });
+    document.body.appendChild(overlay);
 
     // Modal show/hide
     document.querySelectorAll('[data-modal]').forEach(function(trigger) {

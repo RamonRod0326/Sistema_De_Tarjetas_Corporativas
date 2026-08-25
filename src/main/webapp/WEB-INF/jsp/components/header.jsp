@@ -3,7 +3,11 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <fmt:setTimeZone value="America/Mexico_City"/>
 <header class="content-header">
-    <div></div>
+    <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Menú">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+    </button>
     <div class="user-avatar">
         <c:choose>
             <c:when test="${not empty sessionScope.usuario}">

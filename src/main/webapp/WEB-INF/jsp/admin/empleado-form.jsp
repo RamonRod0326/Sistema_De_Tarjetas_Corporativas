@@ -49,7 +49,7 @@
                 </div>
 
                 <!-- Form fields -->
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+                <div class="two-col-equal" style="gap:1.25rem;">
                     <div class="input-group">
                         <label style="color:#8892a4;font-size:0.8rem;display:block;margin-bottom:0.5rem;">Nombre(s) *</label>
                         <input type="text" name="nombre" id="fieldNombre" value="${isEdit ? empForm.nombre : ''}" placeholder="Primer nombre" required
@@ -92,7 +92,7 @@
                     <div class="input-group">
                         <label style="color:#8892a4;font-size:0.8rem;display:block;margin-bottom:0.5rem;">Contraseña inicial *</label>
                         <div style="position:relative;">
-                            <input type="password" name="password" id="passInput" placeholder="Mínimo 8 caracteres" required minlength="8"
+                            <input type="password" name="password" id="passInput" placeholder="Mínimo 8 caracteres con al menos un número" required minlength="8"
                                 style="width:100%;padding:0.75rem 2.5rem 0.75rem 0.75rem;background:#0d1520;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:0.85rem;box-sizing:border-box;">
                             <button type="button" onclick="var i=document.getElementById('passInput');i.type=i.type==='password'?'text':'password';"
                                 style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#6B7084;">
@@ -119,7 +119,7 @@
                 <!-- Buttons -->
                 <div style="display:flex;justify-content:flex-end;gap:1rem;margin-top:2rem;">
                     <a href="${pageContext.request.contextPath}/admin/empleados" class="btn btn-outline">Cancelar</a>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" onclick="return validarFormEmpleado()">
                         ${isEdit ? 'Editar Empleado' : 'Guardar Empleado'}
                     </button>
                 </div>
@@ -142,6 +142,23 @@
     [fNombre, fPat].forEach(function(el) { if (el) el.addEventListener('input', actualizarAvatar); });
     actualizarAvatar();
 })();
+function validarFormEmpleado() {
+    var passInput   = document.getElementById('passInput');
+    var passConfirm = document.getElementById('passConfirm');
+    if (!passInput) return true; // modo edición, sin campo de contraseña
+    var pass = passInput.value;
+    if (pass.length < 8 || !/\d/.test(pass)) {
+        alert('La contraseña debe tener al menos 8 caracteres y contener al menos un número.');
+        passInput.focus();
+        return false;
+    }
+    if (passConfirm && pass !== passConfirm.value) {
+        alert('Las contraseñas no coinciden.');
+        passConfirm.focus();
+        return false;
+    }
+    return true;
+}
 </script>
 </body>
 </html>

@@ -38,7 +38,7 @@
         .hero-saldo-currency { color: var(--text-secondary); font-size: 0.8rem; font-weight: 500; margin-top: 0.2rem; }
 
         /* ---- Stat cards ---- */
-        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
         .stat-card { background: #0d1520; border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 1.25rem; display: flex; align-items: center; gap: 1rem; }
         .stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .stat-label { color: var(--text-secondary); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.2rem; }
@@ -68,13 +68,6 @@
         .mov-meta { color: var(--text-secondary); font-size: 0.7rem; margin-top: 0.1rem; }
         .mov-monto { font-weight: 700; font-size: 0.88rem; white-space: nowrap; }
 
-        /* ---- Mini tarjeta visual ---- */
-        .mini-card { border-radius: 14px; padding: 1.5rem; background: linear-gradient(135deg,#0a1628,#1a2f50); border: 1px solid rgba(0,255,209,0.18); position: relative; overflow: hidden; }
-        .mini-card::after { content:''; position:absolute; bottom:-30px; right:-30px; width:120px; height:120px; border-radius:50%; background:rgba(0,255,209,0.05); }
-        .mini-card-num { color: #fff; font-size: 1rem; letter-spacing: 3px; font-family: monospace; margin: 0.75rem 0 0.5rem; }
-        .mini-card-label { color: rgba(255,255,255,0.5); font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1px; }
-        .mini-card-name { color: #fff; font-size: 0.85rem; font-weight: 600; margin-top: 0.3rem; }
-        .mini-card-chip { width: 28px; height: 22px; background: linear-gradient(135deg,#d4b85a,#e8c96e); border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -113,16 +106,6 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background:rgba(99,71,251,0.15);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c63fc" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                    </div>
-                    <div>
-                        <p class="stat-label">Saldo promedio</p>
-                        <c:set var="numCuentas" value="${fn:length(cuentas)}"/>
-                        <p class="stat-value">$<fmt:formatNumber value="${numCuentas gt 0 ? saldoTotal / numCuentas : 0}" pattern="#,##0"/></p>
-                    </div>
-                </div>
-                <div class="stat-card">
                     <div class="stat-icon" style="background:rgba(255,184,0,0.1);">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
                     </div>
@@ -134,14 +117,14 @@
             </div>
 
             <!-- ===== CONTENIDO PRINCIPAL ===== -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+            <div class="two-col-equal" style="gap:1.5rem;">
 
                 <!-- Col 1: Mis cuentas -->
-                <div style="display:flex;flex-direction:column;gap:1.5rem;">
+                <div>
                     <div class="card" style="background:#0d1520;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:1.5rem;">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;">
                             <h3 style="color:#fff;font-size:0.95rem;margin:0;">Mis Cuentas</h3>
-                            <a href="${pageContext.request.contextPath}/user/tarjetas" style="font-size:0.78rem;color:var(--accent);">Ver tarjetas →</a>
+                            <a href="${pageContext.request.contextPath}/user/cuentas" style="font-size:0.78rem;color:var(--accent);">Ver cuentas →</a>
                         </div>
                         <c:choose>
                             <c:when test="${empty cuentas}">
@@ -181,36 +164,12 @@
                         </c:choose>
                     </div>
 
-                    <!-- Mini tarjeta visual (primera cuenta) -->
-                    <c:if test="${not empty cuentas}">
-                        <div class="mini-card">
-                            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                                <div>
-                                    <p style="color:rgba(255,255,255,0.5);font-size:0.62rem;text-transform:uppercase;letter-spacing:2px;margin:0;">FinTech Corp</p>
-                                    <p style="color:var(--accent);font-size:0.72rem;margin:0.15rem 0 0;">${cuentas[0].categoria}</p>
-                                </div>
-                                <div class="mini-card-chip"></div>
-                            </div>
-                            <p class="mini-card-num">●●●● ●●●● ●●●● ${fn:substring(cuentas[0].numeroCuenta,12,16)}</p>
-                            <div style="display:flex;justify-content:space-between;align-items:flex-end;">
-                                <div>
-                                    <p class="mini-card-label">Titular</p>
-                                    <p class="mini-card-name">${fn:toUpperCase(sessionScope.usuario)}</p>
-                                </div>
-                                <div style="text-align:right;">
-                                    <p class="mini-card-label">Saldo</p>
-                                    <p style="color:var(--accent);font-weight:700;font-size:0.95rem;">$<fmt:formatNumber value="${cuentas[0].saldo}" pattern="#,##0.00"/></p>
-                                </div>
-                            </div>
-                        </div>
-                    </c:if>
                 </div>
 
                 <!-- Col 2: Transacciones recientes -->
                 <div class="card" style="background:#0d1520;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:1.5rem;">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
                         <h3 style="color:#fff;font-size:0.95rem;margin:0;">Transacciones recientes</h3>
-                        <a href="${pageContext.request.contextPath}/user/transferencias" style="font-size:0.78rem;color:var(--accent);">Ver todo →</a>
                     </div>
                     <c:choose>
                         <c:when test="${empty movimientos}">

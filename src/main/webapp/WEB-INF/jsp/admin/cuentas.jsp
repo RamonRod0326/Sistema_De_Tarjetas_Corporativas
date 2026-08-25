@@ -36,6 +36,12 @@
         .emp-row:hover { background:rgba(255,255,255,0.03); }
         .modal-chip { padding:0.3rem 0.8rem;border-radius:20px;cursor:pointer;background:#0d1520;border:1px solid rgba(255,255,255,0.1);color:#8892a4;font-size:0.78rem;transition:all 0.15s; }
         .modal-chip.selected { background:rgba(0,255,255,0.12);border-color:#0ff;color:#0ff; }
+        .table-scroll { overflow-x:auto; }
+        .table-scroll .data-table { min-width:520px; }
+        @media(max-width:600px){
+            .emp-drawer { width:100% !important;right:-100% !important; }
+            .emp-drawer.open { right:0 !important; }
+        }
     </style>
 </head>
 <body>
@@ -49,7 +55,7 @@
             <p style="color:#8892a4;font-size:0.85rem;margin-bottom:1.5rem;">Haz clic en un empleado para ver el detalle de sus cuentas y administrar fondos.</p>
 
             <!-- Top cards -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem;">
+            <div class="two-col-equal" style="gap:1.5rem;margin-bottom:2rem;">
                 <div class="card" style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.5rem;">
                     <h3 style="color:#fff;font-size:1rem;margin:0 0 0.5rem;">Añadir Nuevo Talento</h3>
                     <p style="color:#8892a4;font-size:0.8rem;line-height:1.6;margin-bottom:1rem;">Crea cuentas corporativas para nuevos empleados y asigna fondos operativos iniciales.</p>
@@ -60,7 +66,7 @@
                 </div>
                 <div class="card" style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.5rem;">
                     <h3 style="color:#fff;font-size:1rem;margin:0 0 0.75rem;">Resumen General</h3>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                    <div class="two-col-equal" style="gap:0.75rem;">
                         <div style="background:#111827;border-radius:8px;padding:0.75rem;">
                             <p style="color:#0ff;font-size:1.2rem;font-weight:700;margin:0;">${stats.cuentasActivas}</p>
                             <p style="color:#6B7084;font-size:0.72rem;margin:0.1rem 0 0;">Cuentas activas</p>
@@ -94,7 +100,7 @@
             </form>
 
             <!-- Table -->
-            <div class="table-container" style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
+            <div class="table-container table-scroll" style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
                 <table class="data-table" style="width:100%;border-collapse:collapse;">
                     <thead>
                         <tr style="border-bottom:1px solid rgba(255,255,255,0.08);">
@@ -336,7 +342,7 @@ function openDrawer(uid) {
                 '<input type="hidden" name="cuentaId" value="' + c.cuentaId + '">' +
                 '<div class="add-funds-row">' +
                     '<input type="number" class="add-funds-input" name="monto" placeholder="Monto a agregar (MXN)" min="1" step="0.01" id="fondoInput' + i + '">' +
-                    '<button type="submit" class="add-funds-btn" onclick="return validarFondo(' + i + ')">Agregar</button>' +
+                    '<button type="button" class="add-funds-btn" onclick="validarFondo(' + i + ', this)">Agregar</button>' +
                 '</div>' +
             '</form>' +
         '</div>';
@@ -391,41 +397,43 @@ function prepararEmision() {
 }
 
 function confirmarEliminar(cuentaId) {
-    if (!confirm('¿Eliminar esta cuenta? Se marcará como inactiva.')) return;
-    var form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '${pageContext.request.contextPath}/admin/cuentas/eliminar';
-    var inp = document.createElement('input');
-    inp.type='hidden'; inp.name='cuentaId'; inp.value=cuentaId;
-    form.appendChild(inp);
-    document.body.appendChild(form);
-    form.submit();
+    showConfirm('La cuenta se marcará como inactiva y dejará de operar.', function() {
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '${pageContext.request.contextPath}/admin/cuentas/eliminar';
+        var inp = document.createElement('input');
+        inp.type='hidden'; inp.name='cuentaId'; inp.value=cuentaId;
+        form.appendChild(inp);
+        document.body.appendChild(form);
+        form.submit();
+    }, { title: '¿Eliminar cuenta?', confirmText: 'Sí, eliminar', danger: true });
 }
 
-async function reactivarEmpleado(id) {
-    if (!confirm('¿Reactivar a este empleado? Se descongelarán sus cuentas y tarjetas.')) return;
-    try {
-        const res = await fetch('${pageContext.request.contextPath}/api/empleados?id=' + id, { method: 'PATCH' });
-        const data = await res.json();
-        if (data.ok) { closeDrawer(); location.reload(); }
-        else showToast('error', 'Error', data.msg || 'No se pudo reactivar');
-    } catch(e) {
-        showToast('error', 'Error', 'Error de conexión');
-    }
+function reactivarEmpleado(id) {
+    showConfirm('Se descongelarán las cuentas y tarjetas del empleado.', async function() {
+        try {
+            const res = await fetch('${pageContext.request.contextPath}/api/empleados?id=' + id, { method: 'PATCH' });
+            const data = await res.json();
+            if (data.ok) { closeDrawer(); location.reload(); }
+            else showToast('error', 'Error', data.msg || 'No se pudo reactivar');
+        } catch(e) { showToast('error', 'Error', 'Error de conexión'); }
+    }, { title: '¿Reactivar empleado?', confirmText: 'Sí, reactivar', danger: false });
 }
 
-function validarFondo(idx) {
+function validarFondo(idx, btn) {
     var input = document.getElementById('fondoInput' + idx);
     var monto = parseFloat(input.value);
-    if (!monto || monto <= 0) { input.style.borderColor='#FF4D6A'; setTimeout(function(){input.style.borderColor='';},1500); return false; }
+    if (!monto || monto <= 0) { input.style.borderColor='#FF4D6A'; setTimeout(function(){input.style.borderColor='';},1500); return; }
     if (monto > saldoGlobal) {
         var disponible = saldoGlobal.toLocaleString('es-MX',{minimumFractionDigits:2});
         showToast('error','Saldo global insuficiente','Solo hay $' + disponible + ' MXN disponibles en la cuenta corporativa.');
         input.style.borderColor='#FF4D6A'; setTimeout(function(){input.style.borderColor='';},1500);
-        return false;
+        return;
     }
     var montoFmt = monto.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
-    return confirm('¿Confirmar envío de $' + montoFmt + ' MXN a la cuenta del empleado?');
+    showConfirm('Se enviarán <strong>$' + montoFmt + ' MXN</strong> a la cuenta del empleado.', function() {
+        btn.closest('form').submit();
+    }, { title: '¿Confirmar envío de fondos?', confirmText: 'Sí, enviar', danger: false });
 }
 
 </script>

@@ -22,8 +22,22 @@
         .kpi-value { color:#fff;font-size:1.6rem;font-weight:700;margin:0;line-height:1.1; }
         .kpi-accent { color:#0ff; }
         .kpi-sub { color:#6B7084;font-size:0.72rem;margin:0.3rem 0 0; }
-
         .dash-row { display:grid;grid-template-columns:3fr 2fr;gap:1.5rem;align-items:start; }
+        .dash-header { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;gap:1rem; }
+        .table-scroll { overflow-x:auto; }
+        .filter-links { display:flex;gap:0.5rem;flex-wrap:wrap; }
+        @media(max-width:1024px){
+            .kpi-grid { grid-template-columns:repeat(2,1fr); }
+            .dash-row  { grid-template-columns:1fr; }
+        }
+        @media(max-width:600px){
+            .kpi-grid { grid-template-columns:1fr 1fr; }
+            .dash-header { flex-direction:column; }
+            .dash-header .btn { width:100%; justify-content:center; }
+        }
+        @media(max-width:400px){
+            .kpi-grid { grid-template-columns:1fr; }
+        }
 
         .emp-row-dash { display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0;border-bottom:1px solid rgba(255,255,255,0.04); }
         .emp-row-dash:last-child { border-bottom:none; }
@@ -41,13 +55,13 @@
         <jsp:include page="../components/header.jsp"/>
         <div class="content-area">
 
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;">
+            <div class="dash-header">
                 <div>
                     <h1 class="page-title" style="margin-bottom:0.25rem;">Resumen General</h1>
                     <p class="page-subtitle" style="margin:0;">Panel de control administrativo · FinTech Corp.</p>
                 </div>
                 <button onclick="document.getElementById('modalFondos').classList.add('open')"
-                        class="btn btn-primary" style="display:inline-flex;align-items:center;gap:0.5rem;">
+                        class="btn btn-primary" style="display:inline-flex;align-items:center;gap:0.5rem;white-space:nowrap;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     Agregar Fondos
                 </button>
@@ -87,7 +101,7 @@
                             <h2 style="color:#fff;font-size:1rem;margin:0;">Últimas transacciones</h2>
                             <p style="color:#8892a4;font-size:0.72rem;margin:0.2rem 0 0;">Ingresos y fondos enviados a empleados</p>
                         </div>
-                        <div style="display:flex;gap:0.5rem;">
+                        <div class="filter-links">
                             <a href="?tipo=&page=1" class="filter-link ${empty tipoFiltro ? 'active' : ''}">Todas</a>
                             <a href="?tipo=deposito&page=1" class="filter-link ${'deposito' eq tipoFiltro ? 'active' : ''}">Ingresos</a>
                             <a href="?tipo=asignacion&page=1" class="filter-link ${'asignacion' eq tipoFiltro ? 'active' : ''}">Fondos</a>
@@ -95,8 +109,8 @@
                         </div>
                     </div>
 
-                    <div style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
-                        <table style="width:100%;border-collapse:collapse;">
+                    <div class="table-scroll" style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
+                        <table style="width:100%;border-collapse:collapse;min-width:480px;">
                             <thead>
                                 <tr style="border-bottom:1px solid rgba(255,255,255,0.08);">
                                     <th style="text-align:left;padding:0.9rem 1rem;color:#8892a4;font-size:0.72rem;font-weight:500;">Descripción</th>

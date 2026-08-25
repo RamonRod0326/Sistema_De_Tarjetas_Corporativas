@@ -111,7 +111,7 @@
                 <form id="transferForm" action="${pageContext.request.contextPath}/user/cuentas" method="POST">
                     <input type="hidden" name="cuentaOrigenId"  id="cuentaOrigenHidden">
                     <input type="hidden" name="cuentaDestinoId" id="destHidden">
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;">
+                    <div class="two-col-equal" style="gap:1.25rem;margin-bottom:1.25rem;">
                         <div>
                             <label class="tf-label">CUENTA DESTINO</label>
                             <div class="dest-wrapper">
@@ -128,7 +128,7 @@
                         <label class="tf-label">CONCEPTO</label>
                         <input type="text" class="tf-input" name="concepto" id="tfConcepto" placeholder="Ej: Viáticos octubre, Apoyo gasolina...">
                     </div>
-                    <button type="submit" onclick="return validarTransferencia()" class="btn btn-primary" style="padding:0.8rem 2rem;">
+                    <button type="button" onclick="confirmarTransferencia()" class="btn btn-primary" style="padding:0.8rem 2rem;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                         Ejecutar Transferencia
                     </button>
@@ -287,7 +287,7 @@ document.addEventListener('click', function(e) {
 });
 
 // ---- Paginación tarjetas cuentas (max 5, una fila) ----
-var _ctaCardPage = 1, CTA_CARD_SIZE = 5;
+var _ctaCardPage = 1, CTA_CARD_SIZE = 6;
 function renderCtaCards() {
     var total = Object.keys(cuentasJS).length;
     var pages = Math.ceil(total / CTA_CARD_SIZE) || 1;
@@ -337,19 +337,28 @@ document.addEventListener('DOMContentLoaded', function() {
     renderCtaMov();
 });
 
-function validarTransferencia() {
-    var destino  = document.getElementById('destHidden').value;
-    var monto    = parseFloat(document.getElementById('tfMonto').value);
-    var concepto = document.getElementById('tfConcepto').value.trim();
-    if (!destino)  { showToast('error','Cuenta destino requerida','Selecciona una cuenta de destino.'); return false; }
-    if (!monto||monto<=0) { showToast('error','Monto inválido','Ingresa un monto mayor a $0.'); return false; }
+function confirmarTransferencia() {
+    var destino   = document.getElementById('destHidden').value;
+    var monto     = parseFloat(document.getElementById('tfMonto').value);
+    var concepto  = document.getElementById('tfConcepto').value.trim();
+    var destLabel = document.getElementById('destSearch').value;
+
+    if (!destino)  { showToast('error','Cuenta destino requerida','Selecciona una cuenta de destino.'); return; }
+    if (!monto||monto<=0) { showToast('error','Monto inválido','Ingresa un monto mayor a $0.'); return; }
     if (ctaSeleccionada && monto > parseFloat(ctaSeleccionada.saldo)) {
         var disponible = parseFloat(ctaSeleccionada.saldo).toLocaleString('es-MX',{minimumFractionDigits:2});
         showToast('error','Saldo insuficiente','El monto supera el saldo disponible ($' + disponible + ' MXN).');
-        return false;
+        return;
     }
-    if (!concepto) { showToast('error','Concepto requerido','Escribe el concepto de la transferencia.'); return false; }
-    return true;
+    if (!concepto) { showToast('error','Concepto requerido','Escribe el concepto de la transferencia.'); return; }
+
+    var montoFmt = monto.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
+    var msg = 'Enviarás <strong>$' + montoFmt + ' MXN</strong> a <strong>' + esc(destLabel) + '</strong>.<br>'
+            + '<span style="color:#6B7084;font-size:0.8rem;">Concepto: ' + esc(concepto) + '</span>';
+
+    showConfirm(msg, function() {
+        document.getElementById('transferForm').submit();
+    }, { title: '¿Confirmar transferencia?', confirmText: 'Sí, transferir', danger: false });
 }
 </script>
 </body>

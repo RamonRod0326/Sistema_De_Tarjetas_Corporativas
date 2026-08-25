@@ -174,7 +174,7 @@
                         <span class="input-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                         </span>
-                        <input type="password" id="passwordNueva" name="passwordNueva" placeholder="Mínimo 8 caracteres" required minlength="8" autofocus oninput="actualizarFuerza()">
+                        <input type="password" id="passwordNueva" name="passwordNueva" placeholder="Mínimo 8 caracteres con al menos un número" required minlength="8" autofocus oninput="actualizarFuerza()">
                         <button type="button" class="toggle-password">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
@@ -204,10 +204,17 @@
 <script src="${pageContext.request.contextPath}/js/app.js"></script>
 <script>
 function validarReset() {
-    var p1 = document.getElementById('passwordNueva').value;
-    var p2 = document.getElementById('passwordConfirma').value;
+    var p1  = document.getElementById('passwordNueva').value;
+    var p2  = document.getElementById('passwordConfirma').value;
     var err = document.getElementById('matchErr');
-    if (p1 !== p2) { err.style.display='block'; return false; }
+    if (p1.length < 8 || !/\d/.test(p1)) {
+        err.textContent = 'La contraseña debe tener al menos 8 caracteres y contener al menos un número.';
+        err.style.display = 'block'; return false;
+    }
+    if (p1 !== p2) {
+        err.textContent = 'Las contraseñas no coinciden.';
+        err.style.display = 'block'; return false;
+    }
     err.style.display = 'none'; return true;
 }
 function actualizarFuerza() {

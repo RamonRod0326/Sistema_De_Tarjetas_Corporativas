@@ -51,3 +51,4 @@ wallet/
 **/WEB-INF/wallet/truststore*
 **/WEB-INF/wallet/ojdbc*
 src/main/resources/db.properties
+src/main/resources/credentials.properties

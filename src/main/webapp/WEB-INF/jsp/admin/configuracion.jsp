@@ -18,7 +18,7 @@
             <h1 class="page-title" style="margin-bottom:0.25rem;">Configuración</h1>
             <p style="color:#8892a4;font-size:0.85rem;margin-bottom:2rem;">Administra tu identidad digital y protocolos de seguridad institucional.</p>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+            <div class="two-col-equal" style="gap:2rem;">
                 <!-- Left: Profile -->
                 <div class="card" style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.5rem;">
                     <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);">
@@ -81,12 +81,13 @@
                                 </button>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block">Actualizar Credenciales</button>
+                        <div id="adminPassHint" style="display:none;color:#ff4d6a;font-size:0.78rem;margin-bottom:0.75rem;"></div>
+                        <button type="submit" class="btn btn-primary btn-block" onclick="return validarPassAdmin()">Actualizar Credenciales</button>
                     </form>
                     <div style="background:rgba(0,255,255,0.05);border:1px solid rgba(0,255,255,0.2);border-radius:8px;padding:1rem;margin-top:1.25rem;">
                         <p style="color:#0ff;font-size:0.75rem;margin:0;line-height:1.6;">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0ff" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                            La contraseña debe tener al menos 8 caracteres.
+                            La contraseña debe tener al menos 8 caracteres y contener al menos un número.
                         </p>
                     </div>
                 </div>
@@ -101,6 +102,23 @@
 function togglePass(id) {
     var inp = document.getElementById(id);
     inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+function validarPassAdmin() {
+    var nueva    = document.getElementById('passNueva').value;
+    var confirma = document.getElementById('passConfirma').value;
+    var hint     = document.getElementById('adminPassHint');
+    if (nueva.length < 8 || !/\d/.test(nueva)) {
+        hint.textContent = 'La contraseña debe tener al menos 8 caracteres y contener al menos un número.';
+        hint.style.display = 'block';
+        return false;
+    }
+    if (nueva !== confirma) {
+        hint.textContent = 'Las contraseñas no coinciden.';
+        hint.style.display = 'block';
+        return false;
+    }
+    hint.style.display = 'none';
+    return true;
 }
 </script>
 </body>

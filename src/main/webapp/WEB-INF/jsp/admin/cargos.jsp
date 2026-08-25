@@ -30,10 +30,14 @@
             <!-- Toast -->
             <div id="toast" style="display:none;position:fixed;bottom:1.5rem;right:1.5rem;background:#1e2d3d;border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:0.9rem 1.25rem;color:#fff;font-size:0.875rem;z-index:9999;min-width:260px;box-shadow:0 8px 32px rgba(0,0,0,0.4);"></div>
 
-            <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:1.5rem;align-items:start;">
+            <div class="two-col-layout">
 
                 <!-- ── Tabla de cargos ─────────────────────────────────────── -->
                 <div>
+                    <div style="margin-bottom:0.75rem;">
+                        <input type="text" id="cargosBuscar" placeholder="Buscar cargo…" oninput="filtrarCargos()"
+                            style="width:100%;padding:0.7rem 1rem;background:#0d1520;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:0.85rem;outline:none;box-sizing:border-box;">
+                    </div>
                     <div class="table-container" style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
                         <table class="data-table" style="width:100%;border-collapse:collapse;">
                             <thead>
@@ -93,23 +97,32 @@ const CTX = '${pageContext.request.contextPath}';
 
 /* ── Paginación tabla izquierda (cargos) ─────────────────────────── */
 var _allCargos = [];
+var _filteredCargos = [];
 var _cargosCur = 0;
 var CARGOS_SIZE = 6;
 
+function filtrarCargos() {
+    var q = document.getElementById('cargosBuscar').value.trim().toLowerCase();
+    _filteredCargos = q ? _allCargos.filter(function(c){ return c.nombre.toLowerCase().includes(q); }) : _allCargos.slice();
+    _cargosCur = 0;
+    renderCargos();
+}
+
 function cargosPage(delta) {
-    var pages = Math.ceil(_allCargos.length / CARGOS_SIZE) || 1;
+    var pages = Math.ceil(_filteredCargos.length / CARGOS_SIZE) || 1;
     _cargosCur = Math.max(0, Math.min(_cargosCur + delta, pages - 1));
     renderCargos();
 }
 
 function renderCargos() {
-    var total = _allCargos.length;
+    var total = _filteredCargos.length;
     var pages = Math.ceil(total / CARGOS_SIZE) || 1;
-    var slice = _allCargos.slice(_cargosCur * CARGOS_SIZE, (_cargosCur + 1) * CARGOS_SIZE);
+    var slice = _filteredCargos.slice(_cargosCur * CARGOS_SIZE, (_cargosCur + 1) * CARGOS_SIZE);
     var tbody = document.getElementById('cargosTbody');
 
     if (total === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="padding:2rem;text-align:center;color:#8892a4;">Sin cargos registrados</td></tr>';
+        var q = document.getElementById('cargosBuscar') && document.getElementById('cargosBuscar').value.trim();
+        tbody.innerHTML = '<tr><td colspan="3" style="padding:2rem;text-align:center;color:#8892a4;">' + (q ? 'Sin resultados para "' + esc(q) + '"' : 'Sin cargos registrados') + '</td></tr>';
         document.getElementById('cargosPager').style.display = 'none';
         return;
     }
@@ -199,6 +212,7 @@ async function cargarCargos() {
     try {
         const data = await api('GET', '/api/cargos');
         _allCargos = Array.isArray(data) ? data : [];
+        _filteredCargos = _allCargos.slice();
         _cargosCur = 0;
         renderCargos();
     } catch(e) {
@@ -297,18 +311,17 @@ async function eliminarCargo(id, totalEmp) {
         toast('No se puede eliminar: el cargo tiene ' + totalEmp + ' empleado(s) asignado(s)', false);
         return;
     }
-    if (!confirm('¿Eliminar este cargo?')) return;
-    try {
-        const res = await api('DELETE', '/api/cargos?id=' + id);
-        toast(res.msg || 'Operación completada', res.ok);
-        if (res.ok) {
-            document.getElementById('empleadosPanel').innerHTML =
-                '<p style="color:#8892a4;text-align:center;margin-top:3rem;">Selecciona un cargo para ver sus empleados</p>';
-            cargarCargos();
-        }
-    } catch(e) {
-        toast('Error de conexión', false);
-    }
+    showConfirm('Esta acción eliminará el cargo permanentemente.', async function() {
+        try {
+            const res = await api('DELETE', '/api/cargos?id=' + id);
+            toast(res.msg || 'Operación completada', res.ok);
+            if (res.ok) {
+                document.getElementById('empleadosPanel').innerHTML =
+                    '<p style="color:#8892a4;text-align:center;margin-top:3rem;">Selecciona un cargo para ver sus empleados</p>';
+                cargarCargos();
+            }
+        } catch(e) { toast('Error de conexión', false); }
+    }, { title: '¿Eliminar cargo?', confirmText: 'Sí, eliminar', danger: true });
 }
 
 /* ── Cerrar modal al click fuera ─────────────────────────────────── */

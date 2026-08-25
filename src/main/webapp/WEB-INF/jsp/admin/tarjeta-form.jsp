@@ -19,7 +19,7 @@
             <h1 class="page-title" style="margin-bottom:0.25rem;">Configura la nueva credencial</h1>
             <p style="color:#8892a4;font-size:0.85rem;margin-bottom:2rem;">Define los parámetros de la nueva tarjeta corporativa.</p>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+            <div class="two-col-equal" style="gap:2rem;">
                 <!-- Left column -->
                 <div>
                     <h3 style="color:#8892a4;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem;">IDENTIFICACIÓN</h3>
@@ -63,7 +63,7 @@
                 <!-- Right column -->
                 <div>
                     <h3 style="color:#8892a4;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem;">MODALIDAD DE TARJETA</h3>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+                    <div class="two-col-equal" style="gap:1rem;margin-bottom:1.5rem;">
                         <div style="background:rgba(0,255,255,0.05);border:2px solid #0ff;border-radius:12px;padding:1rem;text-align:center;cursor:pointer;">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0ff" stroke-width="1.5" style="margin-bottom:0.5rem;"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                             <p style="color:#0ff;font-size:0.85rem;font-weight:600;margin:0;">Virtual</p>

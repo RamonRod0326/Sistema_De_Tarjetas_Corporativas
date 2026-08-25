@@ -24,7 +24,7 @@
             </svg>
         </div>
         <h1>FinTech Corp</h1>
-        <p>Gestión institucional de activos con precisión de grado militar y transparencia total.</p>
+        <p>Sistema de gestión de tarjetas corporativas empresariales.</p>
         <div class="brand-features">
             <div class="brand-feature">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

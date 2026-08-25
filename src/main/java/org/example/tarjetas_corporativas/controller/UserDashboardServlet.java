@@ -26,7 +26,7 @@ public class UserDashboardServlet extends HttpServlet {
             List<CuentaUserDTO> cuentas = dashboardService.getCuentas(usuarioId);
             request.setAttribute("cuentas",     cuentas);
             request.setAttribute("saldoTotal",  dashboardService.getSaldoTotal(cuentas));
-            request.setAttribute("movimientos", dashboardService.getMovimientosRecientes(usuarioId, 5));
+            request.setAttribute("movimientos", dashboardService.getMovimientosRecientes(usuarioId, 50));
         } catch (ServiceException e) {
             throw new ServletException(e.getMessage(), e);
         }

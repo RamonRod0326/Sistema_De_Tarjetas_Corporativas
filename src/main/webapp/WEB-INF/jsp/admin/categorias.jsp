@@ -29,10 +29,14 @@
 
             <div id="toast" style="display:none;position:fixed;bottom:1.5rem;right:1.5rem;background:#1e2d3d;border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:0.9rem 1.25rem;color:#fff;font-size:0.875rem;z-index:9999;min-width:260px;box-shadow:0 8px 32px rgba(0,0,0,0.4);"></div>
 
-            <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:1.5rem;align-items:start;">
+            <div class="two-col-layout">
 
                 <!-- Tabla de categorías -->
                 <div>
+                    <div style="margin-bottom:0.75rem;">
+                        <input type="text" id="catsBuscar" placeholder="Buscar categoría…" oninput="filtrarCats()"
+                            style="width:100%;padding:0.7rem 1rem;background:#0d1520;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:0.85rem;outline:none;box-sizing:border-box;">
+                    </div>
                     <div class="table-container" style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
                         <table class="data-table" style="width:100%;border-collapse:collapse;">
                             <thead>
@@ -89,23 +93,32 @@
 <script>
 const CTX = '${pageContext.request.contextPath}';
 var _allCats = [];
+var _filteredCats = [];
 var _catsCur = 0;
 var CATS_SIZE = 6;
 
+function filtrarCats() {
+    var q = document.getElementById('catsBuscar').value.trim().toLowerCase();
+    _filteredCats = q ? _allCats.filter(function(c){ return c.nombre.toLowerCase().includes(q); }) : _allCats.slice();
+    _catsCur = 0;
+    renderCats();
+}
+
 function catsPage(delta) {
-    var pages = Math.ceil(_allCats.length / CATS_SIZE) || 1;
+    var pages = Math.ceil(_filteredCats.length / CATS_SIZE) || 1;
     _catsCur = Math.max(0, Math.min(_catsCur + delta, pages - 1));
     renderCats();
 }
 
 function renderCats() {
-    var total = _allCats.length;
+    var total = _filteredCats.length;
     var pages = Math.ceil(total / CATS_SIZE) || 1;
-    var slice = _allCats.slice(_catsCur * CATS_SIZE, (_catsCur + 1) * CATS_SIZE);
+    var slice = _filteredCats.slice(_catsCur * CATS_SIZE, (_catsCur + 1) * CATS_SIZE);
     var tbody = document.getElementById('catsTbody');
 
     if (total === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="padding:2rem;text-align:center;color:#8892a4;">Sin categorías registradas</td></tr>';
+        var q = document.getElementById('catsBuscar') && document.getElementById('catsBuscar').value.trim();
+        tbody.innerHTML = '<tr><td colspan="3" style="padding:2rem;text-align:center;color:#8892a4;">' + (q ? 'Sin resultados para "' + esc(q) + '"' : 'Sin categorías registradas') + '</td></tr>';
         document.getElementById('catsPager').style.display = 'none';
         return;
     }
@@ -157,6 +170,7 @@ async function cargarCats() {
     try {
         const data = await api('GET', '/api/categorias');
         _allCats = Array.isArray(data) ? data : [];
+        _filteredCats = _allCats.slice();
         _catsCur = 0;
         renderCats();
     } catch(e) {
@@ -290,18 +304,17 @@ async function eliminarCat(id, totalCuentas) {
         toast('No se puede eliminar: la categoría tiene ' + totalCuentas + ' cuenta(s) activa(s)', false);
         return;
     }
-    if (!confirm('¿Eliminar esta categoría?')) return;
-    try {
-        const res = await api('DELETE', '/api/categorias?id=' + id);
-        toast(res.msg || 'Operación completada', res.ok);
-        if (res.ok) {
-            document.getElementById('cuentasPanel').innerHTML =
-                '<p style="color:#8892a4;text-align:center;margin-top:3rem;">Selecciona una categoría para ver sus cuentas</p>';
-            cargarCats();
-        }
-    } catch(e) {
-        toast('Error de conexión', false);
-    }
+    showConfirm('Esta acción eliminará la categoría permanentemente.', async function() {
+        try {
+            const res = await api('DELETE', '/api/categorias?id=' + id);
+            toast(res.msg || 'Operación completada', res.ok);
+            if (res.ok) {
+                document.getElementById('cuentasPanel').innerHTML =
+                    '<p style="color:#8892a4;text-align:center;margin-top:3rem;">Selecciona una categoría para ver sus cuentas</p>';
+                cargarCats();
+            }
+        } catch(e) { toast('Error de conexión', false); }
+    }, { title: '¿Eliminar categoría?', confirmText: 'Sí, eliminar', danger: true });
 }
 
 document.getElementById('modalOverlay').addEventListener('click', function(e) {

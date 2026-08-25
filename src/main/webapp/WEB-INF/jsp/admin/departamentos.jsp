@@ -7,6 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Departamentos - FinTech Corp</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/styles.css">
+    <style>
+        .page-header-row { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;gap:1rem; }
+        .table-scroll { overflow-x:auto; }
+        .table-scroll .data-table { min-width:360px; }
+        @media(max-width:600px){
+            .page-header-row { flex-direction:column; }
+            .page-header-row .btn { width:100%;justify-content:center; }
+        }
+    </style>
 </head>
 <body>
 <div class="app-layout">
@@ -16,12 +25,12 @@
         <jsp:include page="../components/header.jsp"/>
         <div class="content-area">
 
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;">
+            <div class="page-header-row">
                 <div>
                     <h1 class="page-title" style="margin:0;">Gestión de Departamentos</h1>
                     <p style="color:#8892a4;font-size:0.85rem;margin-top:0.25rem;">CRUD con entidades enlazadas — departamentos y sus empleados asignados.</p>
                 </div>
-                <button class="btn btn-primary" onclick="abrirModalNuevo()" style="display:inline-flex;align-items:center;gap:0.5rem;">
+                <button class="btn btn-primary" onclick="abrirModalNuevo()" style="display:inline-flex;align-items:center;gap:0.5rem;flex-shrink:0;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     Nuevo Departamento
                 </button>
@@ -29,11 +38,15 @@
 
             <div id="toast" style="display:none;position:fixed;bottom:1.5rem;right:1.5rem;background:#1e2d3d;border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:0.9rem 1.25rem;color:#fff;font-size:0.875rem;z-index:9999;min-width:260px;box-shadow:0 8px 32px rgba(0,0,0,0.4);"></div>
 
-            <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:1.5rem;align-items:start;">
+            <div class="two-col-layout">
 
                 <!-- Tabla de departamentos -->
                 <div>
-                    <div class="table-container" style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
+                    <div style="margin-bottom:0.75rem;">
+                        <input type="text" id="deptosBuscar" placeholder="Buscar departamento…" oninput="filtrarDeptos()"
+                            style="width:100%;padding:0.7rem 1rem;background:#0d1520;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:0.85rem;outline:none;box-sizing:border-box;">
+                    </div>
+                    <div class="table-container table-scroll" style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
                         <table class="data-table" style="width:100%;border-collapse:collapse;">
                             <thead>
                                 <tr style="border-bottom:1px solid rgba(255,255,255,0.08);">
@@ -89,24 +102,33 @@
 <script>
 const CTX = '${pageContext.request.contextPath}';
 var _allDeptos = [];
+var _filteredDeptos = [];
 var _deptosCur = 0;
 var DEPTOS_SIZE = 6;
 
+function filtrarDeptos() {
+    var q = document.getElementById('deptosBuscar').value.trim().toLowerCase();
+    _filteredDeptos = q ? _allDeptos.filter(function(d){ return d.nombre.toLowerCase().includes(q); }) : _allDeptos.slice();
+    _deptosCur = 0;
+    renderDeptos();
+}
+
 function deptosPage(delta) {
-    var total = _allDeptos.length;
+    var total = _filteredDeptos.length;
     var pages = Math.ceil(total / DEPTOS_SIZE) || 1;
     _deptosCur = Math.max(0, Math.min(_deptosCur + delta, pages - 1));
     renderDeptos();
 }
 
 function renderDeptos() {
-    var total = _allDeptos.length;
+    var total = _filteredDeptos.length;
     var pages = Math.ceil(total / DEPTOS_SIZE) || 1;
-    var slice = _allDeptos.slice(_deptosCur * DEPTOS_SIZE, (_deptosCur + 1) * DEPTOS_SIZE);
+    var slice = _filteredDeptos.slice(_deptosCur * DEPTOS_SIZE, (_deptosCur + 1) * DEPTOS_SIZE);
     var tbody = document.getElementById('deptosTbody');
 
     if (total === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="padding:2rem;text-align:center;color:#8892a4;">Sin departamentos registrados</td></tr>';
+        var q = document.getElementById('deptosBuscar') && document.getElementById('deptosBuscar').value.trim();
+        tbody.innerHTML = '<tr><td colspan="3" style="padding:2rem;text-align:center;color:#8892a4;">' + (q ? 'Sin resultados para "' + esc(q) + '"' : 'Sin departamentos registrados') + '</td></tr>';
         document.getElementById('deptosPager').style.display = 'none';
         return;
     }
@@ -131,6 +153,7 @@ function renderDeptos() {
 
     var from = _deptosCur * DEPTOS_SIZE + 1;
     var to   = Math.min((_deptosCur + 1) * DEPTOS_SIZE, total);
+    // pager uses _filteredDeptos.length already via total
     document.getElementById('deptosInfo').textContent    = from + '-' + to + ' de ' + total;
     document.getElementById('deptosPagInfo').textContent = 'Pág. ' + (_deptosCur + 1) + ' / ' + pages;
     document.getElementById('deptosPrev').disabled = _deptosCur === 0;
@@ -158,6 +181,7 @@ async function cargarDeptos() {
     try {
         const data = await api('GET', '/api/departamentos');
         _allDeptos = Array.isArray(data) ? data : [];
+        _filteredDeptos = _allDeptos.slice();
         _deptosCur = 0;
         renderDeptos();
     } catch(e) {
@@ -289,18 +313,17 @@ async function eliminarDepto(id, totalEmp) {
         toast('No se puede eliminar: el departamento tiene ' + totalEmp + ' empleado(s) asignado(s)', false);
         return;
     }
-    if (!confirm('¿Eliminar este departamento?')) return;
-    try {
-        const res = await api('DELETE', '/api/departamentos?id=' + id);
-        toast(res.msg || 'Operación completada', res.ok);
-        if (res.ok) {
-            document.getElementById('empleadosPanel').innerHTML =
-                '<p style="color:#8892a4;text-align:center;margin-top:3rem;">Selecciona un departamento para ver sus empleados</p>';
-            cargarDeptos();
-        }
-    } catch(e) {
-        toast('Error de conexión', false);
-    }
+    showConfirm('Esta acción eliminará el departamento permanentemente.', async function() {
+        try {
+            const res = await api('DELETE', '/api/departamentos?id=' + id);
+            toast(res.msg || 'Operación completada', res.ok);
+            if (res.ok) {
+                document.getElementById('empleadosPanel').innerHTML =
+                    '<p style="color:#8892a4;text-align:center;margin-top:3rem;">Selecciona un departamento para ver sus empleados</p>';
+                cargarDeptos();
+            }
+        } catch(e) { toast('Error de conexión', false); }
+    }, { title: '¿Eliminar departamento?', confirmText: 'Sí, eliminar', danger: true });
 }
 
 document.getElementById('modalOverlay').addEventListener('click', function(e) {

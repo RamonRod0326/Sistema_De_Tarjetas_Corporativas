@@ -19,7 +19,7 @@
             <h1 class="page-title" style="margin-bottom:0.25rem;">Configuración</h1>
             <p style="color:#8892a4;font-size:0.85rem;margin-bottom:2rem;">Administra tu identidad digital y protocolos de seguridad institucional.</p>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+            <div class="two-col-equal" style="gap:2rem;">
                 <!-- Left: Profile -->
                 <div class="card" style="background:#0d1520;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.5rem;">
                     <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);">
@@ -66,18 +66,19 @@
                         </div>
                         <div class="input-group" style="margin-bottom:1.25rem;">
                             <label style="color:#8892a4;font-size:0.8rem;display:block;margin-bottom:0.5rem;">Nueva contraseña</label>
-                            <input type="password" name="passwordNueva" placeholder="••••••••" style="width:100%;padding:0.75rem;background:#0a0e17;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:0.85rem;">
+                            <input type="password" id="userPassNueva" name="passwordNueva" placeholder="••••••••" style="width:100%;padding:0.75rem;background:#0a0e17;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:0.85rem;">
                         </div>
                         <div class="input-group" style="margin-bottom:1.5rem;">
                             <label style="color:#8892a4;font-size:0.8rem;display:block;margin-bottom:0.5rem;">Confirmar nueva contraseña</label>
-                            <input type="password" name="passwordConfirma" placeholder="••••••••" style="width:100%;padding:0.75rem;background:#0a0e17;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:0.85rem;">
+                            <input type="password" id="userPassConfirma" name="passwordConfirma" placeholder="••••••••" style="width:100%;padding:0.75rem;background:#0a0e17;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:0.85rem;">
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block">Actualizar Credenciales</button>
+                        <div id="userPassHint" style="display:none;color:#ff4d6a;font-size:0.78rem;margin-bottom:0.75rem;"></div>
+                        <button type="submit" class="btn btn-primary btn-block" onclick="return validarPassUser()">Actualizar Credenciales</button>
                     </form>
                     <div style="background:rgba(0,255,255,0.05);border:1px solid rgba(0,255,255,0.2);border-radius:8px;padding:1rem;margin-top:1.25rem;">
                         <p style="color:#0ff;font-size:0.75rem;margin:0;line-height:1.6;">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0ff" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                            La contraseña debe tener al menos 8 caracteres.
+                            La contraseña debe tener al menos 8 caracteres y contener al menos un número.
                         </p>
                     </div>
                 </div>
@@ -86,5 +87,24 @@
     </div>
 </div>
 <script src="${pageContext.request.contextPath}/js/app.js"></script>
+<script>
+function validarPassUser() {
+    var nueva    = document.getElementById('userPassNueva').value;
+    var confirma = document.getElementById('userPassConfirma').value;
+    var hint     = document.getElementById('userPassHint');
+    if (nueva.length < 8 || !/\d/.test(nueva)) {
+        hint.textContent = 'La contraseña debe tener al menos 8 caracteres y contener al menos un número.';
+        hint.style.display = 'block';
+        return false;
+    }
+    if (nueva !== confirma) {
+        hint.textContent = 'Las contraseñas no coinciden.';
+        hint.style.display = 'block';
+        return false;
+    }
+    hint.style.display = 'none';
+    return true;
+}
+</script>
 </body>
 </html>
